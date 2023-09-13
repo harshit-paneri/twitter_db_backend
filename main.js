@@ -10,10 +10,9 @@ app.use(express.json())
 // get all useraccounts
 app.get('/UserAccounts', async (req, res) => {
   try {
-    // Fetch all UserAccount records using Prisma
     const userAccounts = await prisma.userAccount.findMany({
       include: {
-        userProfile: true // If you want to include the associated UserProfile
+        userProfile: true 
       }
     })
 
@@ -29,13 +28,11 @@ app.get('/UserAccounts', async (req, res) => {
 
 app.get('/UserAccount/:id', async (req, res) => {
   try {
-    const userId = req.params.id // Use the id as a string, not parsed to an integer
-
-    // Fetch the UserAccount by its ID using Prisma
+    const userId = req.params.id 
     const user = await prisma.userAccount.findUnique({
-      where: { id: userId }, // Use userId as a string
+      where: { id: userId }, 
       include: {
-        userProfile: true // If you want to include the associated UserProfile
+        userProfile: true 
       }
     })
 
@@ -55,13 +52,9 @@ app.get('/UserAccount/:id', async (req, res) => {
 app.post('/useraccount', async (req, res) => {
   try {
     const { user_name, email, mob_number } = req.body
-
-    // Validate the request body
     if (!user_name || !email || !mob_number) {
       return res.status(400).json({ error: 'Missing required fields' })
-    }
-
-    // Create a new UserAccount using Prisma without providing the 'id'
+      }
     const newUser = await prisma.userAccount.create({
       data: {
         user_name,
@@ -69,13 +62,60 @@ app.post('/useraccount', async (req, res) => {
         mob_number
       }
     })
-
     return res.status(201).json(newUser)
   } catch (error) {
     console.error('Error creating user:', error)
     return res.status(500).json({ error: 'Internal server error' })
   }
 })
+// DELETE useraccount 
+app.delete('/useraccount/:id', async (req, res) => {
+  try {
+    const userId = req.params.id
+    const user = await prisma.userAccount.findUnique({
+      where: { id: userId }
+    })
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+    const deletedUser = await prisma.userAccount.delete({
+      where: { id: userId }
+    })
+    return res.json(deletedUser)
+  } catch (error) {
+    console.error('Error deleting user:', error)
+    return res.status(500).json({ error: 'Internal server error' })
+  }
+})
+// UPDATE useraccount
+app.put('/useraccount/:id', async (req, res) => {
+  try {
+    const userId = req.params.id
+    const { user_name, email, mob_number } = req.body
+    if (!user_name || !email || !mob_number) {
+      return res.status(400).json({ error: 'Missing required fields' })
+    }
+    const user = await prisma.userAccount.findUnique({
+      where: { id: userId }
+    })
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+    const updatedUser = await prisma.userAccount.update({
+      where: { id: userId },
+      data: {
+        user_name,
+        email,
+        mob_number
+      }
+    })
+    return res.json(updatedUser)
+  } catch (error) {
+    console.error('Error updating user:', error)
+    return res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
