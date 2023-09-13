@@ -11,7 +11,7 @@ datasource db {
 }
 
 model UserAccount {
-  id    Int     @id @default(autoincrement())
+  id    String     @id @db.Uuid @default(uuid())
   user_name  String
   email String  @unique
   mob_number String
@@ -23,7 +23,7 @@ model UserProfile  {
   id    Int     @id @default(autoincrement())
   like  Int
   description String
-  useraccount_id Int @unique
+  useraccount_id String @db.Uuid @unique
   useraccount UserAccount @relation(fields: [useraccount_id], references: [id])
   
 }
